@@ -16,7 +16,7 @@ feedparser
 beautifulsoup4
 newspaper3k
 openai
-google-generativeai
+google-genai
 cryptography
 httpx
 requests

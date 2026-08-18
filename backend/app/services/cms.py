@@ -293,8 +293,19 @@ class CMSService:
 
             elif cms_type == "custom":
                 endpoint = credentials.get("endpoint_url", "")
-                # Just do a HEAD request to check the endpoint is reachable
-                resp = requests.head(endpoint, timeout=10)
+                headers = {}
+                auth_method = credentials.get("auth_method", "none")
+                auth_secret = credentials.get("auth_secret", "")
+                if auth_method == "api_key":
+                    headers[credentials.get("auth_header_name", "X-API-Key")] = auth_secret
+                elif auth_method == "bearer":
+                    headers["Authorization"] = f"Bearer {auth_secret}"
+                # Some webhook servers reject HEAD, so use a lightweight GET fallback.
+                resp = requests.head(endpoint, headers=headers, timeout=10, allow_redirects=True)
+                if resp.status_code in (405, 501):
+                    resp = requests.get(endpoint, headers=headers, timeout=10, stream=True)
+                if resp.status_code >= 400:
+                    return {"success": False, "message": f"Endpoint returned HTTP {resp.status_code}"}
                 return {"success": True, "message": f"Endpoint reachable (HTTP {resp.status_code})"}
 
             return {"success": False, "message": f"Unknown CMS type: {cms_type}"}

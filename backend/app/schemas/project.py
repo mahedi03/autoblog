@@ -81,6 +81,11 @@ class ProjectBase(BaseModel):
 
 
 class ProjectCreate(ProjectBase):
+    primary_keywords: str = ""
+    niche: str = ""
+    tone: str = "professional"
+    ai_provider: str = "gemini"
+
     """
     Validates that cms_credentials match the expected schema for the selected CMS type.
     """

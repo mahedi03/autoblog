@@ -1,6 +1,9 @@
 from typing import List, Optional, Union
 from pydantic import AnyHttpUrl, EmailStr, validator
 from pydantic_settings import BaseSettings
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
 class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
@@ -40,6 +43,6 @@ class Settings(BaseSettings):
 
     class Config:
         case_sensitive = True
-        env_file = ".env"
+        env_file = str(PROJECT_ROOT / ".env")
 
 settings = Settings()

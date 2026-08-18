@@ -1,5 +1,5 @@
 import openai
-import google.generativeai as genai
+from google import genai
 from app.core.config import settings
 from typing import Optional, Dict
 
@@ -11,19 +11,25 @@ class AIService:
         if provider == "openai":
             openai.api_key = self.api_key
         elif provider == "gemini":
-            genai.configure(api_key=self.api_key)
-            self.model = genai.GenerativeModel('gemini-pro')
+            self.client = genai.Client(api_key=self.api_key)
 
     async def generate_content(self, prompt: str) -> str:
+        if not self.api_key or self.api_key.startswith("your_"):
+            raise RuntimeError(f"No valid API key configured for {self.provider}")
         if self.provider == "openai":
-            response = await openai.ChatCompletion.acreate(
-                model="gpt-4",
-                messages=[{"role": "user", "content": prompt}]
+            client = openai.AsyncOpenAI(api_key=self.api_key)
+            response = await client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "user", "content": prompt}],
+                response_format={"type": "json_object"},
             )
-            return response.choices[0].message.content
+            return response.choices[0].message.content or "{}"
         elif self.provider == "gemini":
-            response = await self.model.generate_content_async(prompt)
-            return response.text
+            response = await self.client.aio.models.generate_content(
+                model="gemini-3.6-flash",
+                contents=prompt,
+            )
+            return response.text or "{}"
         return ""
 
     def get_seo_prompt(self, facts: str, keywords: str, tone: str) -> str:

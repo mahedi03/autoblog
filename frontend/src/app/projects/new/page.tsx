@@ -27,7 +27,7 @@ export default function NewProject() {
     niche: '',
     keywords: '',
     tone: 'professional',
-    ai_provider: 'openai',
+    ai_provider: 'gemini',
   })
 
   const handleTestConnection = async () => {
@@ -96,7 +96,11 @@ export default function NewProject() {
         name: formData.name,
         cms_type: formData.cms_type,
         cms_credentials,
-        cta_template: ''
+        cta_template: '',
+        primary_keywords: formData.keywords,
+        niche: formData.niche,
+        tone: formData.tone,
+        ai_provider: formData.ai_provider,
       }
       
       await ProjectAPI.create(projectPayload)
